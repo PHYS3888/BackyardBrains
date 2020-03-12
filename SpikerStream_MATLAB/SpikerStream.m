@@ -5,14 +5,15 @@ clear all
 close all
 delete(instrfindall);
 
-port_number = 4; % change this depending on what is the number in "device manager" 
+port_number = 9; % change this depending on what is the number in "device manager" 
 
 %-------------------------------------------------------------------------------
 % Parameters
 %-------------------------------------------------------------------------------
+
 total_time = 200; % code will stop after this amount of time in seconds [[1 s = 20000 buffer size]]
 
-max_time = 20; % time plotted in window [s]
+max_time = 10; % time plotted in window [s]
 
 %-------------------------------------------------------------------------------
 % Initialize import data stream
@@ -38,21 +39,27 @@ N_max_loops = max_time/T_acquire;       %total number of loops to cover desire t
 
 for i = 1:N_loops 
     % take enough data to cover the first time window
+
+    % read and process data first
+    data = fread(s)';
+    data_temp = process_data(data);
+    % start loops
     if i <= N_max_loops
         if i==1
-            data = fread(s)';
+            data_actual = data_temp;
         else
-            data = [fread(s)' data]; % the result stream will be in data variable
+            data_actual = [data_temp data_actual]; % the result stream will be in data variable            
         end
+
     else
-        % continue adding data to the time window
-        fprintf(1,'%u/%u loops\n',i,N_loops); % just to keep an eye out on how many loops are left
-        data = circshift(data',s.InputBufferSize)';
-        data(1:s.InputBufferSize) = fread(s)';
+    % continue adding data to the time window after window is finished
+    data_actual = circshift(data_actual,[0 length(data_temp)]);
+    data_actual(1:length(data_temp)) = data_temp';
+    
     end
-    data_actual = process_data_new(data);
-    % fixed time bug, putting condition on time once the maximum number of loops is reached
+
     t = min(i,N_max_loops)*s.InputBufferSize/20000*linspace(0,1,length(data_actual));
+
     drawnow;
     plot(t,data_actual);
     xlabel('time (s)')
