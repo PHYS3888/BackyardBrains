@@ -13,7 +13,7 @@ theBaudRate = 230400;
 if ismac
     % Get available ports by running:
     % ls /dev/tty.*
-    thePortName = '/dev/tty.usbmodem1411';
+    thePortName = num2str(PortNumber);
 else
     thePortName = ['COM' num2str(PortNumber)];
 end
