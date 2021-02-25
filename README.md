@@ -8,7 +8,7 @@ There are two ways that you can work with this code:
 
 ### 1. Download .zip
 
-For users unfamiliar with git, the latest version of the repository can be downloaded by simply clicking the green "Clone or download" button, and then clicking "Download .zip".
+For users unfamiliar with git, the latest version of the repository can be downloaded by simply clicking the green "Code" button above, and then clicking "Download ZIP".
 
 ### 2. Forking the repo
 
