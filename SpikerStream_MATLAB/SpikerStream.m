@@ -1,67 +1,80 @@
-% Script reads data from BackyardBrain's Arduino SpikerShield
+function dataActual = SpikerStream(totalTime,inputBufferSize,maxTime,portNumber)
+% Function reads data from BackyardBrain's Arduino SpikerShield
 % https://backyardbrains.com/products/heartAndBrainSpikerShieldBundle
-% script produces data in "result" variable
-clear all
-close all
+
+%---INPUTS:
+% totalTime: code will stop after this many seconds [1 s = 20000 buffer size]
+% inputBufferSize: buffer size (in the range 1000-20000)
+%                   e.g., inputBufferSize = 20000 means it waits
+%                           1 second before plotting
+% maxTime: time plotted in window [s]
+% portNumber: the port to read data from.
+%        change this to match the number in (e.g., Device Manager on Windows)
+%-------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
+
+% CHECK INPUTS/SET DEFAULTS:
+if nargin < 1
+    totalTime = 20;
+end
+if nargin < 2
+    inputBufferSize = 1000;
+end
+if nargin < 3
+    maxTime = 10;
+end
+if nargin < 4
+    portNumber = 9;
+end
+
 delete(instrfindall);
-
-port_number = 9; % change this depending on what is the number in "device manager" 
-
-%-------------------------------------------------------------------------------
-% Parameters
-%-------------------------------------------------------------------------------
-
-total_time = 200; % code will stop after this amount of time in seconds [[1 s = 20000 buffer size]]
-
-max_time = 10; % time plotted in window [s]
 
 %-------------------------------------------------------------------------------
 % Initialize import data stream
 %-------------------------------------------------------------------------------
-
-inputBufferSize = 1000;   % Bufffer Size - in the range 1000-20000
-% e.g. inputBufferSize = 20000 means it waits 1 second before plotting
-
-s = InitializePortInput(inputBufferSize,port_number);
+s = InitializePortInput(inputBufferSize,portNumber);
 
 %-------------------------------------------------------------------------------
 % Record and plot data
 %-------------------------------------------------------------------------------
 figure('color','w');
+ax = gca();
 xlabel('Time (s)')
 ylabel('Input signal (arb)')
-data = [];
 
-N_loops = 20000/s.InputBufferSize*total_time;
+numLoops = 20000/s.InputBufferSize*totalTime;
 
-T_acquire = s.InputBufferSize/20000;    % length of time that data is acquired for 
-N_max_loops = max_time/T_acquire;       %total number of loops to cover desire time window
+% Length of time that data is acquired for:
+T_acquire = s.InputBufferSize/20000;
 
-for i = 1:N_loops 
+% Total number of loops to cover desired time window:
+numMaxLoops = maxTime/T_acquire;
+
+for i = 1:numLoops
     % take enough data to cover the first time window
 
     % read and process data first
     data = fread(s)';
-    data_temp = process_data(data);
-    % start loops
-    if i <= N_max_loops
-        if i==1
-            data_actual = data_temp;
-        else
-            data_actual = [data_temp data_actual]; % the result stream will be in data variable            
-        end
+    dataTemp = process_data(data);
 
+    % start loops
+    if i <= numMaxLoops
+        if i==1
+            dataActual = dataTemp;
+        else
+            dataActual = [dataTemp dataActual]; % the result stream will be in data variable
+        end
     else
-    % continue adding data to the time window after window is finished
-    data_actual = circshift(data_actual,[0 length(data_temp)]);
-    data_actual(1:length(data_temp)) = data_temp';
-    
+        % continue adding data to the time window after window is finished
+        dataActual = circshift(dataActual,[0 length(dataTemp)]);
+        dataActual(1:length(dataTemp)) = dataTemp';
     end
 
-    t = min(i,N_max_loops)*s.InputBufferSize/20000*linspace(0,1,length(data_actual));
+    t = min(i,numMaxLoops)*s.InputBufferSize/20000*linspace(0,1,length(dataActual));
 
+    plot(t,dataActual);
+    ax.XLim = [0,maxTime];
     drawnow;
-    plot(t,data_actual);
-    xlabel('time (s)')
-    xlim([0,max_time])
+end
+
 end
