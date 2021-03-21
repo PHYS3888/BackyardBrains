@@ -48,9 +48,9 @@ plt.ion()
 fig.show()
 fig.canvas.draw()
 
-#for k in range(0,int(N_loops)):
 k = 0
-while True:
+#while True:
+while k < N_loops: #Will end early so can't run forever.
     data = read_arduino(ser,inputBufferSize)
     data_temp = process_data(data)
     if k <= N_max_loops:
