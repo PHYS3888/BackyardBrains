@@ -9,7 +9,7 @@ To use:
 You can find the correct port by running `ls /dev` to see all your ports, It will probably be something of the form 'ttyACMXX' (you need to have it plugged in so it shows up), try plugging and unplugging to see what changes if you need.
 
 2. Run with `sudo python3 SpikerStream_Linux.py`. You need sudo so it can access the port (ideally check the code is safe before running it as sudo - it theoretically could have `os.run('rm -rf /') in there).
-It will probably give you a ModuleNotFoundError as you don't have serial/numpy/matplotlib. Solve this with `pip install pyserial`, run again, and repeat (`pip install numpy`, `pip install matplotlib`)
+It will probably give you a ModuleNotFoundError as you don't have serial/numpy/matplotlib. Solve this with `sudo pip install pyserial`, run again, and repeat (`sudo pip install numpy`, `sudo pip install matplotlib`)
 
 The code will run for a few seconds and then plot it in matplotlib.
 
